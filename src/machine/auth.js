@@ -1,4 +1,5 @@
 import { Machine } from 'xstate';
+import { history } from '../index';
 
 const auth = Machine({
   id: 'auth',
@@ -12,7 +13,8 @@ const auth = Machine({
         src: 'isLoggedIn',
         onDone: 'customer',
         onError: 'anonymous'
-      }
+      },
+      entry: [{ type: "historyPush", payload: "/" }]
     },
     anonymous: {
       invoke: {
@@ -31,27 +33,35 @@ const auth = Machine({
       }
     },
     home: {
-      id: 'home'
+      id: 'home',
+      entry: [{ type: "historyPush", payload: "/home" }]
     },
     login: {
       id: 'login',
       on: {
         REGISTER: 'register'
-      }
+      },
+      entry: [{ type: "historyPush", payload: "/login" }]
     },
     register: {
       id: 'register',
       on: {
         LOGIN: 'login'
-      }
+      },
+      entry: [{ type: "historyPush", payload: "/register" }]
     }
   }
 },{
+  actions: {
+    historyPush: (context, event, { action }) => {
+      history.push(action.payload);
+    }
+  },
   services: {
     isLoggedIn: (context, event) => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
-          reject()
+          resolve()
         }, 2000);
       });
     },
